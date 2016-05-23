@@ -5,30 +5,139 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Android.Telephony;
+using Shared.Models;
+using Android.Telephony.Gsm;
+using Android.Net;
+using Android.Net.Wifi;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using Shared.Yandex.Locator;
+using Shared.Interfaces;
 
 namespace MetroDatings.Android
 {
-    [Activity(Label = "MetroDatings.Android", MainLauncher = true, Icon = "@drawable/icon")]
-    public class MainActivity : Activity
-    {
-        int count = 1;
+    [Activity(Label = "CodeApp", MainLauncher = true, Icon = "@drawable/icon")]
 
+    public class MainActivity : Activity, IGpsSentData
+    {
+        private static string apiKey = @"ABcDO1cBAAAA-HrnawIAbO_EtcFggTbPPjqnBPjslF_UngIAAAAAAAAAAACl8RS-FHrb_CxnfwmIqWJTFdR6OQ==";
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
-
-            // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
-            // Get our button from the layout resource,
-            // and attach an event to it
-            Button button = FindViewById<Button>(Resource.Id.MyButton);
+            TextView cidLabel = FindViewById<TextView>(Resource.Id.cid);
+            TextView lacLabel = FindViewById<TextView>(Resource.Id.lac);
+            TextView macLabel = FindViewById<TextView>(Resource.Id.mac);
+            TextView ipLabel = FindViewById<TextView>(Resource.Id.ip);
+            TextView gpsLabel = FindViewById<TextView>(Resource.Id.gps);
 
-            var gsmService = new GsmService();
-            var gsmData = gsmService.GetGsmData();
+            var gsmData = GetGsmData();
+            var mac = GetMacAdress();
+            var ip = GetIpAddress();
 
-            button.Text = string.Format("Cid: {0}, Lac: {1}", gsmData.Cid, gsmData.Lac);
-            //button.Click += delegate { button.Text = string.Format("{0} clicks!", count++); };
+            var gpsService = new GpsService();
+            var initialData = new YaLocatorDataModel()
+            {
+                Common = new Common()
+                {
+                    Version = "1.0",
+                    ApiKey = apiKey
+                },
+                GsmCells = new List<GsmCell>()
+                  {
+                      new GsmCell()
+                      {
+                          CountryCode = 250,
+                          OperatorId = 01,
+                          CellId = gsmData.Cid,
+                          Lac = gsmData.Lac,
+                          SignalStrengthGsm = -45,
+                          Age = 1000
+                      }
+                  },
+                WiFiNetworks = new List<WiFiNetwork>()
+                {
+                    new WiFiNetwork()
+                    {
+                        SignalStrengthWiFi = -90,
+                        Age = 1000,
+                        Mac = mac
+                    }
+                },
+                IpAddress = new IpAddress()
+                {
+                    Ip = ip
+                }
+
+                //WORKING TEST DATA FOR PC
+                //CellId = 20952,
+                //Lac = 561,
+                //Mac = "382C4A8E0204",
+                //Ip = "10.205.167.167"
+            };
+
+            var gpsData = gpsService.GetGpsCoordinates(initialData);
+         
+            cidLabel.Text = string.Format("Cid: {0}", gsmData.Cid);
+            lacLabel.Text = string.Format("Lac: {0}", gsmData.Lac);
+            macLabel.Text = string.Format("Mac: {0}", mac);
+            ipLabel.Text = string.Format("Ip: {0}", ip);
+            gpsLabel.Text = string.Format("GpsData: {0}", gpsData);
+        }
+
+        public GsmData GetGsmData()
+        {
+            var data = new GsmData();
+            TelephonyManager telephonyManager = (TelephonyManager)GetSystemService(TelephonyService);
+            GsmCellLocation cellLocation = (GsmCellLocation)telephonyManager.CellLocation;
+
+            if (cellLocation != null)
+            {
+                data.Cid = cellLocation.Cid;
+                data.Lac = cellLocation.Lac;
+            }
+
+            return data;
+        }
+
+        public string GetMacAdress()
+        {
+            var mac = String.Empty;
+            ConnectivityManager cm = (ConnectivityManager)GetSystemService(ConnectivityService);
+            NetworkInfo networkInfo = (NetworkInfo)cm.ActiveNetworkInfo;
+            if (networkInfo == null)
+            {
+                return mac = null;
+            }
+
+            if (networkInfo.IsConnected)
+            {
+                WifiManager wifiManager = (WifiManager)GetSystemService(WifiService);
+                WifiInfo connectionInfo = wifiManager.ConnectionInfo;
+                if (connectionInfo != null)
+                {
+                    mac = connectionInfo.BSSID;
+                }
+            }
+
+            return mac;
+        }
+
+        public string GetIpAddress()
+        {
+            var ipAddress = String.Empty;
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    ipAddress = ip.ToString();
+                }
+            }
+            return ipAddress;
         }
     }
 }

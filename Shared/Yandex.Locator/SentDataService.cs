@@ -9,6 +9,7 @@ namespace Shared
 {
     public class SentDataService
     {
+        //For PC
         public List<string> GetHotspotMacs()
         {
             var macs = new List<string>();

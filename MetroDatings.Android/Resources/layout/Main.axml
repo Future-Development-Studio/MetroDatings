@@ -2,12 +2,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<Button  
-    android:id="@+id/MyButton"
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="@string/Hello"
-    />
+    android:layout_height="fill_parent">
+    <TextView
+        android:text="Cid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/cid"
+        android:layout_marginBottom="14.0dp" />
+    <TextView
+        android:text="Lac"
+        android:layout_width="match_parent"
+        android:layout_height="31.5dp"
+        android:id="@+id/lac" />
+    <TextView
+        android:text="Mac"
+        android:layout_width="match_parent"
+        android:layout_height="32.5dp"
+        android:id="@+id/mac" />
+    <TextView
+        android:text="Ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ip"
+        android:layout_marginBottom="16.5dp" />
+    <TextView
+        android:text="Gps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/gps" />
 </LinearLayout>
