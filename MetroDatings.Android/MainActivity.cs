@@ -46,7 +46,7 @@ namespace MetroDatings.Android
                     Version = "1.0",
                     ApiKey = apiKey
                 },
-                GsmCells = new List<GsmCell>()
+                GsmCells = gsmData == null ? null : new List<GsmCell>()
                   {
                       new GsmCell()
                       {
@@ -58,7 +58,7 @@ namespace MetroDatings.Android
                           Age = 1000
                       }
                   },
-                WiFiNetworks = new List<WiFiNetwork>()
+                WiFiNetworks = mac == null ? null : new List<WiFiNetwork>()
                 {
                     new WiFiNetwork()
                     {
@@ -80,11 +80,11 @@ namespace MetroDatings.Android
             };
 
             var gpsData = gpsService.GetGpsCoordinates(initialData);
-         
-            cidLabel.Text = string.Format("Cid: {0}", gsmData.Cid);
-            lacLabel.Text = string.Format("Lac: {0}", gsmData.Lac);
-            macLabel.Text = string.Format("Mac: {0}", mac);
-            ipLabel.Text = string.Format("Ip: {0}", ip);
+
+            cidLabel.Text = string.Format("Cid: {0}", gsmData != null ? gsmData.Cid.ToString() : "No Cid");
+            lacLabel.Text = string.Format("Lac: {0}", gsmData != null ? gsmData.Lac.ToString() : "No Lac");
+            macLabel.Text = string.Format("Mac: {0}", mac ?? "No mac");
+            ipLabel.Text = string.Format("Ip: {0}", ip ?? "No Ip");
             gpsLabel.Text = string.Format("GpsData: {0}", gpsData);
         }
 
@@ -93,8 +93,9 @@ namespace MetroDatings.Android
             var data = new GsmData();
             TelephonyManager telephonyManager = (TelephonyManager)GetSystemService(TelephonyService);
             GsmCellLocation cellLocation = (GsmCellLocation)telephonyManager.CellLocation;
-
-            if (cellLocation != null)
+            if (cellLocation == null)
+                data = null;
+            else
             {
                 data.Cid = cellLocation.Cid;
                 data.Lac = cellLocation.Lac;
@@ -105,13 +106,9 @@ namespace MetroDatings.Android
 
         public string GetMacAdress()
         {
-            var mac = String.Empty;
+            string mac = null;
             ConnectivityManager cm = (ConnectivityManager)GetSystemService(ConnectivityService);
             NetworkInfo networkInfo = (NetworkInfo)cm.ActiveNetworkInfo;
-            if (networkInfo == null)
-            {
-                return mac = null;
-            }
 
             if (networkInfo.IsConnected)
             {
@@ -128,7 +125,7 @@ namespace MetroDatings.Android
 
         public string GetIpAddress()
         {
-            var ipAddress = String.Empty;
+            string ipAddress = null;
             var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
             {

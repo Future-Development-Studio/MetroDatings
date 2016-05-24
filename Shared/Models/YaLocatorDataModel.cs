@@ -11,11 +11,11 @@ namespace Shared.Models
     {
         [JsonProperty("common")]
         public Common Common { get; set; }
-        [JsonProperty("gsm_cells")]
+        [JsonProperty("gsm_cells", NullValueHandling = NullValueHandling.Ignore)]
         public List<GsmCell> GsmCells { get; set; }
-        [JsonProperty("wifi_networks")]
+        [JsonProperty("wifi_networks", NullValueHandling = NullValueHandling.Ignore)]
         public List<WiFiNetwork> WiFiNetworks { get; set; }
-        [JsonProperty("ip")]
+        [JsonProperty("ip", NullValueHandling = NullValueHandling.Ignore)]
         public IpAddress IpAddress { get; set; }
     }
     public class Common
